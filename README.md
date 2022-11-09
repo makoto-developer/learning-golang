@@ -39,7 +39,15 @@
 ## 変数宣言
 
 ```go
+// basicな書き方
 var job string = "programmer"
+
+// ↑の省略形
+job string = "doctor"
+
+// 再代入禁止
+job string := "student"
+
 ```
 
 ## if
@@ -50,13 +58,38 @@ if job == "programmer" {
 }
 ```
 
+## 比較
+
+```go
+a == b 
+a != b 
+a > b  
+a >= b 
+a < b  
+a <= b 
+a && b 
+a || b
+!a
+```
+
+
 ## 配列
 
 ```go
+// string array
 nameList = []string{"john", "alice", "jane"}
+
+// number array
+scores = []int32{10, 32, 49, 44, 95}
 ```
 
 ## for
+
+```go
+go i:=0; i<10; i++ {
+	// 処理を記述
+}
+```
 
 ```go
 // i is number
@@ -65,8 +98,40 @@ for i, name := range nameList {
 }
 ```
 
+## 構造体
+
+```go
+type Person struct {
+     name: string,
+	 age: uint8,
+     address: string
+}
+```
+
 ## 関数
 
 ```go
-
+func getPerson(name string) (Person) {
+	person := Person{
+		name: name,
+		age: 10,
+		address: string
+    }
+	
+	return person
+}
 ```
+
+## ポインタ
+
+変数はメモリ上に記録されている。
+そのアドレスを取得するには`&変数`で取得できる。
+ポインタ型変数を定義するには`*変数`で定義できる。
+
+```go
+name *string = &name
+
+// 値を更新する
+*name = "bob"
+```
+
