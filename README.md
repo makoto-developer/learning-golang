@@ -624,3 +624,67 @@ func main() {
 }
 ```
 
+goroutineとchannelを使ったパターン
+
+```go
+package main
+
+import (
+ "encoding/csv"
+ "fmt"
+ "io/ioutil"
+ "log"
+ "net/http"
+ "strings"
+ "sync"
+)
+
+func getFile(url string) []byte {
+ resp, err := http.Get(url)
+ defer resp.Body.Close()
+ if err != nil {
+  log.Println("fail to get file. url:%s, err: %v", url, err)
+  return nil
+ }
+ body, err := ioutil.ReadAll(resp.Body)
+ if err != nil {
+  log.Println("fail to read content file. err: %v", err)
+  return nil
+ }
+ return body
+}
+func download(wg *sync.WaitGroup, urls []string, ch chan []byte) {
+ defer wg.Done()
+ defer close(ch)
+ for _, u := range urls {
+  body := getFile(u)
+  ch <- body
+ }
+}
+
+func main() {
+ // run csv server
+ server()
+ urls := []string{
+  "http://localhost:8080/csv/users",
+  "http://localhost:8080/csv/users",
+  "http://localhost:8080/csv/users",
+ }
+ ch := make(chan []byte)
+ var wg sync.WaitGroup
+ wg.Add(1)
+ go download(&wg, urls, ch)
+ for b := range ch {
+  r := csv.NewReader(strings.NewReader(string(b)))
+  for {
+   record, err := r.Read()
+   if err != nil {
+    log.Fatal("cause error csv reader. err: %v", err)
+    break
+   }
+   fmt.Println(record)
+  }
+ }
+ wg.Wait()
+}
+```
