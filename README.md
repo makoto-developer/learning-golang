@@ -544,3 +544,83 @@ https://codesandbox.io/p/devbox/resukondeisiyonnojie-jue-mutexwoshi-u-llngnc
 レースコンディションを検出する方法もある。
 
 Goにはrace condition detectorが付属されていて、コンパイル時に-raceをつけることでrace conditionを防ぐことができる。
+
+## channel(チャネル)
+
+goroutine間でデータをやり取りするための仕組み。
+
+並行処理で安全にデータのやり取りができる。
+
+```go
+package main
+
+import (
+ "fmt"
+ "time"
+)
+
+func main() {
+ ch := make(chan int)
+
+ go func() {
+  fmt.Println("データを送信します...")
+  time.Sleep(2 * time.Second)
+  // ゴルーチンでデータを送信
+  ch <- 496
+ }()
+
+ go func() {
+  fmt.Println("データを送信します...")
+  time.Sleep(2 * time.Second)
+  // ゴルーチンでデータを送信
+  ch <- 1024
+ }()
+
+ go func() {
+  fmt.Println("データを送信します...")
+  time.Sleep(2 * time.Second)
+  // ゴルーチンでデータを送信
+  ch <- 64
+ }()
+
+ fmt.Println("データを待っています...")
+ value := <-ch // チャネルからデータを受信（ブロッキング操作）
+ fmt.Println("受信したデータ:", value) // 496
+ value = <-ch // チャネルからデータを受信（ブロッキング操作）
+ fmt.Println("受信したデータ:", value) // 496
+ value = <-ch // チャネルからデータを受信（ブロッキング操作）
+ fmt.Println("受信したデータ:", value) // 496
+}
+```
+
+selectを使った方法
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func process(ch chan string) {
+	// 重い処理をシミュレート
+	time.Sleep(2 * time.Second)
+	ch <- "処理完了"
+}
+
+func main() {
+	ch := make(chan string)
+	
+	go process(ch)
+	
+	// selectを使ったタイムアウト処理
+	select {
+	case result := <-ch:
+		fmt.Println("結果:", result)
+	case <-time.After(1 * time.Second):
+		fmt.Println("タイムアウト: 処理に時間がかかりすぎています")
+	}
+}
+```
+
